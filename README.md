@@ -1,37 +1,50 @@
 # Digital Forensics & Incident Response (DFIR) Toolkit
 
-Practitioner reference and working tooling for digital forensics — evidence handling, memory and disk acquisition, chain-of-custody documentation, case tracking, and timeline correlation — built to complement [incident-response-playbooks](https://github.com/mrezwanulbari/incident-response-playbooks) (the response *process*) with the forensic *technique and tooling* layer underneath it.
-
-## Why This Exists
-
-Incident response playbooks tell you what decisions to make during an incident. This repository covers the forensic mechanics behind those decisions: how to actually acquire memory without contaminating evidence, how to maintain a defensible chain of custody, and functional tooling for case tracking and timeline correlation when a full case-management platform isn't the right fit for the job.
+Practitioner reference and working tooling for digital forensics — evidence handling, live triage collection (Linux/Windows), network forensics, chain-of-custody documentation, case tracking, and timeline correlation. Built to complement [incident-response-playbooks](https://github.com/mrezwanulbari/incident-response-playbooks) (the response *process*) with the forensic *technique and tooling* layer underneath it.
 
 ## What's Inside
 
 ### Procedures
 | File | Description |
 |---|---|
-| `procedures/evidence-chain-of-custody-template.md` | Documentation template and handling procedure for defensible chain of custody from acquisition through analysis |
-| `procedures/memory-acquisition-checklist.md` | Step-by-step memory acquisition procedure, including order-of-volatility considerations and common pitfalls |
+| `procedures/evidence-chain-of-custody-template.md` | Documentation template and handling procedure for defensible chain of custody |
+| `procedures/memory-acquisition-checklist.md` | Step-by-step memory acquisition procedure, order-of-volatility considerations |
 
-### Tooling (working code, not just documentation)
+### Live Triage Collection Scripts
+| Script | Platform | Testing Status |
+|---|---|---|
+| `tooling/scripts/linux-triage-collector.sh` | Linux | **Tested end-to-end** — verified running against a live container, collects 20 categories of volatile/semi-volatile data, degrades gracefully when a tool (e.g. `systemctl`) isn't present rather than aborting |
+| `tooling/scripts/windows-triage-collector.ps1` | Windows | Written and syntax-reviewed; **not execution-tested** (no Windows environment available in this repository's build process) — validate against a lab VM before relying on it operationally |
+
+### Network Forensics
 | Tool | Description |
 |---|---|
-| [`tooling/case-tracker/`](tooling/case-tracker/) | Stdlib-only Python CLI for case tracking, automatic SHA-256 evidence hashing, chain-of-custody event logging, and IOC tracking — backed by local SQLite |
-| [`tooling/timeline-correlation/`](tooling/timeline-correlation/) | Merges multiple forensic artifact CSVs (filesystem, browser history, event logs) into one chronologically sorted super timeline with source attribution |
+| `tooling/network/pcap-quick-triage.py` | Fast pcap triage: top talkers, protocol breakdown, flagged notable-port activity (RDP, SMB, common C2 ports). **Tested** against a synthetic capture with planted suspicious traffic — correctly flagged it. Requires `scapy` (see `tooling/network/requirements.txt`) |
 
-Both tools are dependency-free (Python standard library only) and tested end-to-end — see each tool's own README for usage.
+### Case Management & Timeline Tooling
+| Tool | Description |
+|---|---|
+| `tooling/case-tracker/` | Stdlib-only Python CLI: case tracking, automatic SHA-256 evidence hashing, chain-of-custody event logging, IOC tracking (SQLite-backed). **Tested end-to-end.** |
+| `tooling/timeline-correlation/` | Merges multi-source forensic CSV timelines into one chronologically sorted super timeline. **Tested** with multi-source sample data. |
+| `tooling/docker/` | Dockerfile + docker-compose for running the case tracker containerized, no local Python setup needed. Written following standard practice; **not build-tested** (no Docker available in this repository's build process) — validate the build yourself before relying on it. |
+
+### Schema & Templates
+| File | Description |
+|---|---|
+| `schema/case-export-schema.json` | Formal JSON Schema for the case tracker's export format. **Validated** against a real export produced by `case_tracker.py`. |
+| `templates/dfir-report-template.md` | Final investigation report structure — executive summary separated from technical findings, timeline, evidence summary, IOCs, root cause, and prioritized recommendations |
 
 ## Relationship to Full-Scale Platforms
 
-For multi-analyst teams needing a web UI, role-based access, and collaborative case workflows, a purpose-built case-management platform — [IRIS](https://github.com/dfir-iris/iris-web) is a strong open-source example — is the right tool, and this repository doesn't attempt to replace that. The tooling here is scoped for solo/field use and for understanding the underlying data model (case → evidence → custody events → IOCs) at a level that's easy to read, audit, and extend, rather than standing up full infrastructure.
+For multi-analyst teams needing a web UI, role-based access, and collaborative case workflows, a purpose-built case-management platform — [IRIS](https://github.com/dfir-iris/iris-web) is a strong open-source example — is the right tool, and this repository doesn't attempt to replace that. The tooling here is scoped for solo/field use and for understanding the underlying data model (case → evidence → custody events → IOCs) at a level that's easy to read, audit, and extend.
 
 ## Core Principles
 
-- **Order of volatility** — capture the most volatile evidence first (memory, network connections) before less volatile evidence (disk, logs)
-- **Write-blocking discipline** — never analyze original evidence directly; work from verified forensic copies
-- **Documentation as you go** — chain of custody gaps discovered after the fact are far harder to defend than documentation maintained in real time
-- **Hash verification at every handoff** — every transfer of evidence should be verified against a cryptographic hash of the original acquisition
+- **Order of volatility** — network/process state before disk, disk before archival media
+- **Write-blocking discipline** — analyze copies, never originals
+- **Documentation as you go** — a custody gap found later is far harder to defend than one avoided in real time
+- **Hash verification at every handoff**
+- **Honest testing status** — every tool above states whether it's been executed and verified, or written but not yet run in its target environment. Treat the latter as a strong draft, not a trusted production tool, until you've validated it yourself.
 
 ## Who This Is For
 
