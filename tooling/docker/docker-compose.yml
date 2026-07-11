@@ -1,0 +1,20 @@
+# Convenience wrapper for running the case tracker with persistent storage
+# and a mounted evidence directory. The case database persists in the
+# named volume across container restarts/rebuilds.
+#
+# Usage:
+#   docker compose run --rm case-tracker init
+#   docker compose run --rm case-tracker create-case --name "INC-2026-014" --description "..."
+#   docker compose run --rm case-tracker add-evidence --case-id 1 --file /evidence/disk.img --description "..."
+
+services:
+  case-tracker:
+    build:
+      context: ../..
+      dockerfile: tooling/docker/Dockerfile
+    volumes:
+      - case_data:/root/.dfir_case_tracker
+      - ./evidence:/evidence:ro   # mount your local evidence directory read-only
+
+volumes:
+  case_data:
