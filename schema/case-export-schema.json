@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mrezwanulbari/digital-forensics-dfir-toolkit/schema/case-export-schema.json",
+  "title": "DFIR Case Export",
+  "description": "Schema for the JSON export produced by tooling/case-tracker/case_tracker.py — formalizes the case/evidence/custody-log/IOC data model so exports can be validated, and so the format is documented for anyone integrating with or extending the case tracker.",
+  "type": "object",
+  "required": ["case", "evidence", "iocs", "exported_at"],
+  "properties": {
+    "case": {
+      "type": "object",
+      "required": ["id", "name", "status", "created_at"],
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "description": { "type": ["string", "null"] },
+        "status": { "type": "string", "enum": ["open", "closed", "on-hold"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "case_id", "file_path", "sha256", "acquired_at", "custody_log"],
+        "properties": {
+          "id": { "type": "integer" },
+          "case_id": { "type": "integer" },
+          "file_path": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "acquired_at": { "type": "string", "format": "date-time" },
+          "custody_log": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["action", "actor", "timestamp"],
+              "properties": {
+                "action": { "type": "string" },
+                "actor": { "type": ["string", "null"] },
+                "note": { "type": ["string", "null"] },
+                "timestamp": { "type": "string", "format": "date-time" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "iocs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "case_id", "ioc_type", "value", "added_at"],
+        "properties": {
+          "id": { "type": "integer" },
+          "case_id": { "type": "integer" },
+          "ioc_type": { "type": "string", "enum": ["ip", "domain", "url", "hash", "email", "filename", "other"] },
+          "value": { "type": "string" },
+          "context": { "type": ["string", "null"] },
+          "added_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "exported_at": { "type": "string", "format": "date-time" }
+  }
+}
