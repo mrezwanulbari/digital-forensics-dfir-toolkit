@@ -15,6 +15,7 @@ Practitioner reference and working tooling for digital forensics — evidence ha
 |---|---|---|
 | `tooling/scripts/linux-triage-collector.sh` | Linux | **Tested end-to-end** — verified running against a live container, collects 20 categories of volatile/semi-volatile data, degrades gracefully when a tool (e.g. `systemctl`) isn't present rather than aborting |
 | `tooling/scripts/windows-triage-collector.ps1` | Windows | Written and syntax-reviewed; **not execution-tested** (no Windows environment available in this repository's build process) — validate against a lab VM before relying on it operationally |
+| `tooling/scripts/macos-triage-collector.sh` | macOS | Written and syntax-reviewed (`bash -n` passed); **not execution-tested against real macOS** (no macOS environment available) — validate against a lab Mac before relying on it operationally |
 
 ### Network Forensics
 | Tool | Description |
@@ -33,6 +34,11 @@ Practitioner reference and working tooling for digital forensics — evidence ha
 |---|---|
 | `schema/case-export-schema.json` | Formal JSON Schema for the case tracker's export format. **Validated** against a real export produced by `case_tracker.py`. |
 | `templates/dfir-report-template.md` | Final investigation report structure — executive summary separated from technical findings, timeline, evidence summary, IOCs, root cause, and prioritized recommendations |
+
+### Further Resources
+| File | Description |
+|---|---|
+| `resources/related-open-source-tools.md` | Short, opinionated pointer list to the OSS tools that show up repeatedly in real investigations (Volatility, Velociraptor, Plaso, Wireshark, Atomic Red Team, etc.), organized by the same categories used in this repo. For comprehensive category coverage, see [awesome-incident-response](https://github.com/meirwah/awesome-incident-response), the canonical curated list this page points to rather than duplicates |
 
 ## Relationship to Full-Scale Platforms
 
@@ -61,3 +67,4 @@ Maintained by Shakil Md. Rezwanul Bari, Cyber Security Engineer with 17+ years o
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
